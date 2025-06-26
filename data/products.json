@@ -1,0 +1,63 @@
+
+[
+  {
+    "id": 1,
+    "slug": "neuroscan-x500",
+    "name": "NeuroScan X500",
+    "category": "NEUROSURGERY",
+    "description": "Advanced neural imaging system with 5D mapping capabilities",
+    "features": [
+      "Real-time brain activity visualization",
+      "AI-powered anomaly detection",
+      "Non-invasive scanning technology",
+      "500% faster than previous models"
+    ],
+    "specs": {
+      "weight": "45kg",
+      "dimensions": "120cm x 80cm x 60cm",
+      "power": "220V, 1500W"
+    },
+    "price": 125000,
+    "image": "/images/slider1.jpg"
+  },
+  {
+    "id": 2,
+    "slug": "cardioflow-pro",
+    "name": "CardioFlow Pro",
+    "category": "CARDIAC",
+    "description": "Next-gen cardiovascular monitoring system",
+    "features": [
+      "Continuous blood flow analysis",
+      "Wireless patient monitoring",
+      "Predictive heart failure detection",
+      "Cloud-connected diagnostics"
+    ],
+    "specs": {
+      "weight": "28kg",
+      "dimensions": "90cm x 60cm x 40cm",
+      "power": "110-240V, 800W"
+    },
+    "price": 89500,
+    "image": "/images/slider1.jpg"
+  },
+    {
+    "id": 3,
+    "slug": "cardioflow-pro",
+    "name": "CardioFlow Pro",
+    "category": "CARDIAC",
+    "description": "Next-gen cardiovascular monitoring system",
+    "features": [
+      "Continuous blood flow analysis",
+      "Wireless patient monitoring",
+      "Predictive heart failure detection",
+      "Cloud-connected diagnostics"
+    ],
+    "specs": {
+      "weight": "28kg",
+      "dimensions": "90cm x 60cm x 40cm",
+      "power": "110-240V, 800W"
+    },
+    "price": 89500,
+    "image": "/images/slider1.jpg"
+  }
+]

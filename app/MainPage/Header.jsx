@@ -25,7 +25,7 @@ import Link from 'next/link';
 const navItems = [
   { name: 'Home', path: '/' },
   { name: 'Products', path: '/products' },
-  { name: 'Solutions', path: '/solutions' },
+  { name: 'Categories', path: '/categories' },
   { name: 'About Us', path: '/Aboutus' },
   { name: 'Contact', path: '/Contact' },
 ];

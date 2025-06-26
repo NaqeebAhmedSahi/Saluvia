@@ -1,312 +1,364 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { Box, Typography, Container, useTheme, Button, Grid, Chip, Stack } from '@mui/material';
+import { Box, Typography, Container, useTheme, Button, Stack } from '@mui/material';
 import { motion, useInView, useAnimation } from 'framer-motion';
 import Image from 'next/image';
-import Hexagon from '@mui/icons-material/Hexagon';
-import CircuitBoard from '@mui/icons-material/Memory';
-import Atom from '@mui/icons-material/Science';
-import Brain from '@mui/icons-material/Psychology';
-import Pulse from '@mui/icons-material/MonitorHeart';
-import PrecisionManufacturing from '@mui/icons-material/PrecisionManufacturing';
-import VerifiedUser from '@mui/icons-material/VerifiedUser';
-import Innovation from '@mui/icons-material/AutoAwesome';
-import Collaboration from '@mui/icons-material/Handshake';
 
-const AboutSection = () => {
-    const theme = useTheme();
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: false, margin: '-100px' });
+const CompanyIntroSection = () => {
+  const theme = useTheme();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: false, margin: '-100px' });
+  const controls = useAnimation();
 
-    // Animation Variants
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.15,
-                when: "beforeChildren"
-            }
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        when: "beforeChildren"
+      }
+    }
+  };
+
+  const textVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.8,
+        ease: [0.1, 0.7, 0.3, 1]
+      }
+    }
+  };
+
+  const imageVariants = {
+    hidden: { scale: 0.8, opacity: 0, rotate: -5 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      rotate: 0,
+      transition: {
+        duration: 1,
+        ease: [0.1, 0.7, 0.3, 1],
+        delay: 0.3
+      }
+    }
+  };
+
+  const floatingVariants = {
+    float: {
+      y: [-10, 10],
+      transition: {
+        y: {
+          duration: 3,
+          repeat: Infinity,
+          repeatType: "reverse",
+          ease: "easeInOut"
         }
-    };
+      }
+    }
+  };
 
-    const fadeIn = {
-        hidden: { opacity: 0, y: 30 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.8 }
-        }
-    };
+  const glowVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: [0, 0.4, 0],
+      transition: {
+        duration: 4,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut"
+      }
+    }
+  };
 
-    const scaleIn = {
-        hidden: { scale: 0.9, opacity: 0 },
-        visible: {
-            scale: 1,
-            opacity: 1,
-            transition: { duration: 0.6 }
-        }
-    };
+  return (
+    <Box sx={{
+      position: 'relative',
+      overflow: 'hidden',
+      py: { xs: 8, md: 15 },
+      background: `linear-gradient(135deg, #0a0a0a 0%, ${theme.palette.primary.dark} 100%, ${theme.palette.primary.main} 50%)`,
+      color: '#fff'
+    }} ref={ref}>
+      {/* Glow effects */}
+      <motion.div
+        variants={glowVariants}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        style={{
+          position: 'absolute',
+          top: '20%',
+          left: '10%',
+          width: '300px',
+          height: '300px',
+          borderRadius: '50%',
+          background: theme.palette.secondary.main,
+          filter: 'blur(100px)',
+          zIndex: 0
+        }}
+      />
+      
+      <motion.div
+        variants={glowVariants}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        transition={{ delay: 0.5 }}
+        style={{
+          position: 'absolute',
+          bottom: '10%',
+          right: '10%',
+          width: '400px',
+          height: '400px',
+          borderRadius: '50%',
+          background: theme.palette.primary.light,
+          filter: 'blur(100px)',
+          zIndex: 0
+        }}
+      />
 
-    return (
+      <Container maxWidth="lg">
         <Box sx={{
-            position: 'relative',
-            overflow: 'hidden',
-            py: 12,
-            background: '#000',
-            color: '#fff'
-        }} ref={ref}>
-            
-            {/* Animated grid overlay */}
-            <Box sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
-                backgroundSize: '40px 40px',
-                opacity: 0.3,
-                zIndex: 0
-            }} />
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+          gap: 6,
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {/* Text content */}
+          <motion.div
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+            variants={containerVariants}
+          >
+            <motion.div variants={textVariants}>
+              <Typography variant="overline" sx={{
+                mb: 2,
+                display: 'block',
+                fontWeight: 'bold',
+                letterSpacing: '3px',
+                color: 'rgba(255,255,255,0.8)'
+              }}>
+                INNOVATING HEALTHCARE
+              </Typography>
+            </motion.div>
 
-            <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
-                <motion.div
-                    initial="hidden"
-                    animate={isInView ? "visible" : "hidden"}
-                    variants={containerVariants}
+            <motion.div variants={textVariants}>
+              <Typography variant="h2" sx={{
+                mb: 3,
+                fontWeight: 'bold',
+                fontSize: { xs: '2.5rem', md: '3.5rem' },
+                lineHeight: 1.2,
+                textShadow: '0 4px 20px rgba(0,0,0,0.2)'
+              }}>
+                Pioneering <span style={{ color: '#000' }}>Medical</span> Technology Solutions
+              </Typography>
+            </motion.div>
+
+            <motion.div variants={textVariants}>
+              <Typography variant="body1" sx={{
+                mb: 4,
+                fontSize: '1.1rem',
+                lineHeight: 1.8,
+                color: 'rgba(255,255,255,0.9)',
+                maxWidth: '90%'
+              }}>
+                At MedTech Innovations, we're revolutionizing healthcare through cutting-edge technology. 
+                Our team of experts combines medical expertise with advanced engineering to create solutions 
+                that improve patient outcomes and streamline clinical workflows.
+              </Typography>
+            </motion.div>
+
+            <Stack direction="row" spacing={3} sx={{ mt: 4 }}>
+              <motion.div
+                variants={textVariants}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  variant="contained"
+                //   color="black"
+                  size="large"
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: '12px',
+                    fontWeight: 'bold',
+                    backgroundColor: '#000', 
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    boxShadow: `0 8px 24px ${theme.palette.secondary.main}40`,
+                  }}
                 >
-                    <Grid container spacing={8} alignItems="center">
-                        {/* Left Column - Company Showcase */}
-                        <Grid item xs={12} md={6}>
-                            <motion.div variants={fadeIn}>
-                                <Chip 
-                                    label="ABOUT NEUROTECH SOLUTIONS" 
-                                    sx={{ 
-                                        mb: 3,
-                                        background: 'rgba(0, 255, 255, 0.1)',
-                                        color: '#00ffcc',
-                                        border: '1px solid #00ffcc',
-                                        fontWeight: 'bold',
-                                        letterSpacing: '1px',
-                                        fontSize: '0.8rem',
-                                        height: '32px'
-                                    }} 
-                                />
-                            </motion.div>
+                  Our Products
+                </Button>
+              </motion.div>
+              
+              <motion.div
+                variants={textVariants}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  variant="outlined"
+                  size="large"
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: '12px',
+                    fontWeight: 'bold',
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    color: '#fff',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    '&:hover': {
+                      borderColor: '#fff',
+                      background: 'rgba(255,255,255,0.1)'
+                    }
+                  }}
+                >
+                  Learn More
+                </Button>
+              </motion.div>
+            </Stack>
+          </motion.div>
 
-                            <motion.div variants={fadeIn}>
-                                <Typography variant="h2" sx={{ 
-                                    mb: 3, 
-                                    fontWeight: 800,
-                                    fontSize: { xs: '2.5rem', md: '3.5rem' },
-                                    lineHeight: 1.1,
-                                    background: 'linear-gradient(90deg, #ffffff 30%, #00ffcc 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent'
-                                }}>
-                                    Precision Medical Instruments for the Future
-                                </Typography>
-                            </motion.div>
+          {/* Image content */}
+          <motion.div
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+            variants={containerVariants}
+            style={{ position: 'relative', height: '100%' }}
+          >
+            {/* Main image */}
+            <motion.div 
+              variants={imageVariants}
+              style={{
+                position: 'relative',
+                height: '500px',
+                width: '100%',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+                transform: 'perspective(1000px) rotateX(5deg) rotateY(-5deg)',
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              <Image
+                src="/images/slider1.jpg" // Replace with your image
+                alt="Medical Technology"
+                fill
+                className="object-cover"
+                priority
+              />
+            </motion.div>
 
-                            <motion.div variants={fadeIn}>
-                                <Typography variant="body1" sx={{ 
-                                    mb: 4, 
-                                    fontSize: '1.1rem',
-                                    lineHeight: 1.8,
-                                    color: 'rgba(255,255,255,0.8)'
-                                }}>
-                                    Since 2012, NeuroTech Solutions has been at the forefront of <strong>neurological diagnostic equipment</strong> and <strong>surgical robotics</strong>. Our FDA-approved devices are trusted by leading hospitals and research institutions worldwide.
-                                </Typography>
-                            </motion.div>
+            {/* Floating elements */}
+            <motion.div
+              variants={floatingVariants}
+              animate="float"
+              style={{
+                position: 'absolute',
+                top: '-50px',
+                right: '-30px',
+                width: '150px',
+                height: '150px',
+                zIndex: -1
+              }}
+            >
+              <Image
+                 src="/images/slider1.jpg" // Replace with decorative icon
+                alt="Technology Icon"
+                width={150}
+                height={150}
+                className="object-contain"
+              />
+            </motion.div>
 
-                            {/* Core Services */}
-                            <motion.div variants={fadeIn}>
-                                <Typography variant="h6" sx={{ 
-                                    mb: 2,
-                                    fontWeight: 700,
-                                    color: '#00ffcc'
-                                }}>
-                                    OUR SPECIALIZED SOLUTIONS
-                                </Typography>
-                                
-                                <Grid container spacing={2} sx={{ mb: 4 }}>
-                                    {[
-                                        { icon: <Brain fontSize="small" />, title: "NeuroMapping Systems", desc: "Advanced brain activity visualization" },
-                                        { icon: <Pulse fontSize="small" />, title: "VitalSync Monitors", desc: "Real-time patient vitals tracking" },
-                                        { icon: <PrecisionManufacturing fontSize="small" />, title: "Surgical Robotics", desc: "Precision-guided surgical assistants" },
-                                        { icon: <CircuitBoard fontSize="small" />, title: "LabTech Analyzers", desc: "AI-powered diagnostic equipment" }
-                                    ].map((service, index) => (
-                                        <Grid item xs={6} key={index}>
-                                            <Box sx={{ 
-                                                display: 'flex',
-                                                alignItems: 'flex-start',
-                                                mb: 2
-                                            }}>
-                                                <Box sx={{ 
-                                                    color: '#00ffcc',
-                                                    mr: 2,
-                                                    mt: '2px'
-                                                }}>
-                                                    {service.icon}
-                                                </Box>
-                                                <Box>
-                                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                                        {service.title}
-                                                    </Typography>
-                                                    <Typography variant="body2" sx={{ 
-                                                        color: 'rgba(255,255,255,0.7)',
-                                                        fontSize: '0.9rem'
-                                                    }}>
-                                                        {service.desc}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                            </motion.div>
-                        </Grid>
+            <motion.div
+              variants={floatingVariants}
+              animate="float"
+              transition={{ delay: 0.5 }}
+              style={{
+                position: 'absolute',
+                bottom: '-40px',
+                left: '-30px',
+                width: '120px',
+                height: '120px',
+                zIndex: -1
+              }}
+            >
+              <Image
+                src="/images/slider1.jpg"  // Replace with decorative icon
+                alt="Technology Icon"
+                width={120}
+                height={120}
+                className="object-contain"
+              />
+            </motion.div>
 
-                        {/* Right Column - Image & Values */}
-                        <Grid item xs={12} md={6}>
-                            <motion.div variants={scaleIn} style={{ position: 'relative' }}>
-                                <Box sx={{
-                                    position: 'relative',
-                                    height: { xs: '400px', md: '600px' },
-                                    borderRadius: '16px',
-                                    overflow: 'hidden',
-                                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                                    boxShadow: '0 0 30px rgba(0, 255, 255, 0.1)'
-                                }}>
-                                    <Image
-                                        src="/images/medical-lab.jpg"
-                                        alt="NeuroTech medical laboratory"
-                                        fill
-                                        className="object-cover"
-                                        style={{ filter: 'grayscale(30%) contrast(110%)' }}
-                                    />
-                                    <Box sx={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        background: 'linear-gradient(to top, #000000 0%, transparent 50%)'
-                                    }} />
-                                </Box>
-
-                                {/* Core Values Floating Panel */}
-                                <Box sx={{
-                                    position: 'absolute',
-                                    bottom: '-40px',
-                                    right: '40px',
-                                    width: '80%',
-                                    background: 'rgba(0, 20, 30, 0.8)',
-                                    backdropFilter: 'blur(10px)',
-                                    borderRadius: '12px',
-                                    p: 4,
-                                    border: '1px solid rgba(0, 255, 255, 0.2)',
-                                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
-                                }}>
-                                    <Typography variant="h6" sx={{ 
-                                        mb: 3,
-                                        fontWeight: 700,
-                                        color: '#00ffcc'
-                                    }}>
-                                        OUR CORE VALUES
-                                    </Typography>
-                                    
-                                    <Grid container spacing={2}>
-                                        {[
-                                            { icon: <VerifiedUser fontSize="small" />, title: "Precision", desc: "Sub-micron accuracy in all instruments" },
-                                            { icon: <Innovation fontSize="small" />, title: "Innovation", desc: "Pioneering new medical technologies" },
-                                            { icon: <Collaboration fontSize="small" />, title: "Partnership", desc: "Working closely with medical professionals" }
-                                        ].map((value, index) => (
-                                            <Grid item xs={12} sm={4} key={index}>
-                                                <Box sx={{ textAlign: 'center' }}>
-                                                    <Box sx={{
-                                                        width: '50px',
-                                                        height: '50px',
-                                                        borderRadius: '50%',
-                                                        background: 'rgba(0, 255, 255, 0.1)',
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        color: '#00ffcc',
-                                                        mb: 1.5
-                                                    }}>
-                                                        {value.icon}
-                                                    </Box>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                                        {value.title}
-                                                    </Typography>
-                                                    <Typography variant="body2" sx={{ 
-                                                        color: 'rgba(255,255,255,0.7)',
-                                                        fontSize: '0.8rem'
-                                                    }}>
-                                                        {value.desc}
-                                                    </Typography>
-                                                </Box>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-                                </Box>
-                            </motion.div>
-                        </Grid>
-                    </Grid>
-
-                    {/* Company Description */}
-                    <Box sx={{ mt: 15, textAlign: 'center' }}>
-                        <motion.div variants={fadeIn}>
-                            <Typography variant="h3" sx={{ 
-                                mb: 3,
-                                fontWeight: 700,
-                                fontSize: { xs: '2rem', md: '2.5rem' }
-                            }}>
-                                Transforming Healthcare Through Technology
-                            </Typography>
-                        </motion.div>
-
-                        <motion.div variants={fadeIn}>
-                            <Typography variant="body1" sx={{ 
-                                maxWidth: '800px',
-                                mx: 'auto',
-                                mb: 6,
-                                fontSize: '1.1rem',
-                                lineHeight: 1.8,
-                                color: 'rgba(255,255,255,0.8)'
-                            }}>
-                                At NeuroTech Solutions, we combine <strong>cutting-edge engineering</strong> with <strong>medical expertise</strong> to develop instruments that enhance diagnostic accuracy and improve surgical outcomes. Our ISO 13485 certified manufacturing facilities produce equipment that meets the highest standards of quality and reliability, serving over 500 medical institutions across 35 countries.
-                            </Typography>
-                        </motion.div>
-
-                        <motion.div variants={fadeIn}>
-                            <Button 
-                                variant="outlined"
-                                size="large"
-                                sx={{
-                                    px: 6,
-                                    py: 1.5,
-                                    borderRadius: '50px',
-                                    fontWeight: 700,
-                                    fontSize: '1rem',
-                                    color: '#00ffcc',
-                                    borderColor: '#00ffcc',
-                                    '&:hover': {
-                                        background: 'rgba(0, 255, 255, 0.1)',
-                                        borderColor: '#00ffcc',
-                                        boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)'
-                                    },
-                                    transition: 'all 0.3s'
-                                }}
-                            >
-                                Download Company Profile
-                            </Button>
-                        </motion.div>
-                    </Box>
-                </motion.div>
-            </Container>
+            {/* Stats cards */}
+            <motion.div
+              variants={imageVariants}
+              style={{
+                position: 'absolute',
+                bottom: '-40px',
+                right: '40px',
+                background: 'rgba(255,255,255,0.15)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '16px',
+                padding: '20px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                width: '180px'
+              }}
+            >
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>
+                15+
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                Years of Innovation
+              </Typography>
+            </motion.div>
+          </motion.div>
         </Box>
-    );
+      </Container>
+
+      {/* Animated particles background */}
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+        <motion.div
+          key={i}
+          initial={{ y: 0, x: Math.random() * 100 - 50, opacity: 0 }}
+          animate={{
+            y: [0, Math.random() * 100 - 50],
+            x: [0, Math.random() * 100 - 50],
+            opacity: [0, 0.4, 0],
+            transition: {
+              duration: 5 + Math.random() * 10,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+              delay: Math.random() * 5
+            }
+          }}
+          style={{
+            position: 'absolute',
+            width: '5px',
+            height: '5px',
+            borderRadius: '50%',
+            background: '#fff',
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            zIndex: 0
+          }}
+        />
+      ))}
+    </Box>
+  );
 };
 
-export default AboutSection;
+export default CompanyIntroSection;

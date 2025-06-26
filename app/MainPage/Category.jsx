@@ -54,7 +54,7 @@ const CyberMedCategories = () => {
 
   // Holographic effect components
   const HolographicGlow = ({ color, size = 200 }) => (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 0.4 } : {}}
       transition={{ duration: 1.5 }}
@@ -64,12 +64,13 @@ const CyberMedCategories = () => {
   );
 
   return (
-    <div 
+    <div
       ref={ref}
       className="relative overflow-hidden bg-black py-20 px-4"
       style={{
-        background: `radial-gradient(circle at center, #0A0A2A 0%, #000000 100%)`
+        background: `radial-gradient(circle at center, #0a0a0a 0%, #000000 100%)`
       }}
+
     >
       {/* Floating cyber grid */}
       <div className="absolute inset-0 opacity-20">
@@ -132,7 +133,7 @@ const CyberMedCategories = () => {
               {/* Cyber border */}
               <div className={`absolute inset-0 rounded-xl ${category.color} opacity-20 group-hover:opacity-40 transition-all duration-500`} />
               <div className={`absolute inset-0 border-2 ${category.color} rounded-xl opacity-30 group-hover:opacity-70 transition-all duration-500`} />
-              
+
               {/* Animated scan line */}
               <motion.div
                 animate={{ y: ["-100%", "100%"] }}
@@ -158,7 +159,7 @@ const CyberMedCategories = () => {
 
                 {/* Content */}
                 <div className="absolute bottom-0 left-0 p-6 w-full">
-                  <motion.h3 
+                  <motion.h3
                     className="text-3xl font-bold mb-2"
                     style={{
                       textShadow: "0 2px 10px rgba(0,0,0,0.5)",
@@ -169,7 +170,7 @@ const CyberMedCategories = () => {
                   >
                     {category.title}
                   </motion.h3>
-                  <motion.p 
+                  <motion.p
                     className="text-lg font-mono"
                     style={{
                       color: category.color.replace('bg-', 'text-')
@@ -189,7 +190,7 @@ const CyberMedCategories = () => {
 
                 {/* Binary code animation */}
                 <div className="absolute top-4 left-4 opacity-70">
-                  {[1,2,3,4].map((line) => (
+                  {[1, 2, 3, 4].map((line) => (
                     <motion.div
                       key={line}
                       initial={{ opacity: 0 }}
@@ -220,7 +221,7 @@ const CyberMedCategories = () => {
           <button className="relative px-12 py-4 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg overflow-hidden group">
             <span className="relative z-10">EXPLORE ALL DIVISIONS</span>
             <span className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
+
             {/* Button glitch effect */}
             <motion.span
               animate={{ x: [0, 2, -2, 0] }}
@@ -231,7 +232,7 @@ const CyberMedCategories = () => {
               }}
               className="absolute inset-0 border border-white/30 rounded-full pointer-events-none opacity-0 group-hover:opacity-100"
             />
-            
+
             {/* Button scan line */}
             <motion.div
               animate={{ y: ["-100%", "100%"] }}

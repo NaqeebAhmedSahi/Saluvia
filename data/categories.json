@@ -1,0 +1,21 @@
+
+[
+  {
+    "slug": "neurosurgery",
+    "name": "Neurosurgery",
+    "description": "Advanced neurosurgical equipment and systems",
+    "image": "/images/neuro-category.jpg"
+  },
+  {
+    "slug": "cardiac",
+    "name": "Cardiac",
+    "description": "Innovative cardiac care technologies",
+    "image": "/images/cardiac-category.jpg"
+  },
+  {
+    "slug": "orthopedic",
+    "name": "Orthopedic",
+    "description": "Cutting-edge orthopedic solutions",
+    "image": "/images/ortho-category.jpg"
+  }
+]
