@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { MongoClient, ObjectId } from 'mongodb';
 
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGODB_URI || 'mongodb+srv://saluvia:N2742a4633@cluster0.2opnnfp.mongodb.net/saluvia';
 const client = new MongoClient(uri);
 
 export async function GET(request, { params }) {
