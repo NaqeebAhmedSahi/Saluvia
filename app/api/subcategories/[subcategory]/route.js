@@ -5,29 +5,37 @@ const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
 export async function GET(request, { params }) {
-  console.log('Received request for subcategory:', params?.subcategory);
+  // Validate params first
+  if (!params || !params.subcategory) {
+    return NextResponse.json(
+      { error: 'Subcategory parameter is required' },
+      { status: 400 }
+    );
+  }
+
+  const subcategoryParam = params.subcategory;
+  console.log('Received request for subcategory:', subcategoryParam);
 
   try {
     await client.connect();
-    const db = client.db();
     console.log('Connected to MongoDB');
+    const db = client.db();
 
-    // Build subcategory query
+    // Build safer subcategory query with proper checks
     const subcategoryQuery = {
       $or: [
-        { slug: params.subcategory },
-        { subcategory: params.subcategory.replace(/-/g, ' ') },
-        ObjectId.isValid(params.subcategory)
-          ? { _id: new ObjectId(params.subcategory) }
-          : null
-      ].filter(Boolean)
+        { slug: subcategoryParam },
+        { subcategory: subcategoryParam.replace(/-/g, ' ') },
+        ...(ObjectId.isValid(subcategoryParam) 
+          ? [{ _id: new ObjectId(subcategoryParam) }] 
+          : [])
+      ]
     };
 
     console.log('Subcategory query:', JSON.stringify(subcategoryQuery, null, 2));
 
     const subcategory = await db.collection('subcategories').findOne(subcategoryQuery);
-    console.log('Subcategory result:', subcategory);
-
+    
     if (!subcategory) {
       console.log('Subcategory not found');
       return NextResponse.json(
@@ -36,13 +44,21 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Build products query
+    console.log('Subcategory found:', subcategory._id);
+
+    // Build products query with fallbacks
     const productsQuery = {
       $or: [
-        { subcategory: subcategory.subcategory },
+        { subcategory: subcategory.subcategory || '' },
         { subcategoryId: subcategory._id },
-        { subcategorySlug: subcategory.slug || params.subcategory }
-      ]
+        { subcategorySlug: subcategory.slug || subcategoryParam }
+      ].filter(condition => {
+        // Filter out invalid conditions
+        if (typeof condition === 'object' && condition.subcategoryId) return true;
+        if (condition.subcategory) return true;
+        if (condition.subcategorySlug) return true;
+        return false;
+      })
     };
 
     console.log('Products query:', JSON.stringify(productsQuery, null, 2));
@@ -52,43 +68,39 @@ export async function GET(request, { params }) {
       .sort({ createdAt: -1 })
       .toArray();
 
-    console.log('Products found:', products.length);
+    console.log(`Found ${products.length} products`);
 
-    // Format product response
-    const formattedProducts = products.map(product => {
-      const image = Array.isArray(product.image_paths)
-        ? product.image_paths[0]
-        : product.image_paths;
+    // Format products with safe property access
+    const formattedProducts = products.map(product => ({
+      _id: product._id,
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || 0,
+      image_path: Array.isArray(product.image_paths) 
+        ? product.image_paths[0] || ''
+        : product.image_paths || '',
+      slug: product.slug || '',
+      features: product.features || [],
+      createdAt: product.createdAt || new Date()
+    }));
 
-      // console.log('Image Path:', image); // Debug print
-
-      return {
-        _id: product._id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        image_path: image,
-        slug: product.slug,
-        features: product.features || [],
-        createdAt: product.createdAt
-      };
-    });
-
-    // Return response
-    return NextResponse.json({
+    // Prepare response data
+    const responseData = {
       success: true,
       subcategory: {
         _id: subcategory._id,
-        title: subcategory.subcategory || subcategory.title,
-        description: subcategory.description,
-        image_path: subcategory.image_path,
-        category: subcategory.category,
-        slug: subcategory.slug,
+        title: subcategory.subcategory || subcategory.title || '',
+        description: subcategory.description || '',
+        image_path: subcategory.image_path || '',
+        category: subcategory.category || '',
+        slug: subcategory.slug || '',
         metadata: subcategory.metadata || {}
       },
       products: formattedProducts,
       count: formattedProducts.length
-    });
+    };
+
+    return NextResponse.json(responseData);
 
   } catch (error) {
     console.error('Error in subcategories API:', error);
@@ -101,7 +113,11 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   } finally {
-    await client.close();
-    console.log('MongoDB connection closed');
+    try {
+      await client.close();
+      console.log('MongoDB connection closed');
+    } catch (closeError) {
+      console.error('Error closing MongoDB connection:', closeError);
+    }
   }
 }
