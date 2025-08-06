@@ -25,8 +25,9 @@ export default function RootLayout({ children }) {
       <body className="bg-[#f8fafc]">
         <Header />
         <main className="pt-20">{children}</main>
+        <Footer />
       </body>
-      <Footer />
+      
     </html>
   );
 }

@@ -1,37 +1,44 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   AppBar,
   Toolbar,
   Typography,
   Button,
   IconButton,
-  Menu,
-  MenuItem,
+  Collapse,
   Container,
   Box,
   useScrollTrigger,
-  Slide
+  Slide,
+  Paper,
+  Divider,
+  CircularProgress
 } from '@mui/material';
-import { 
-  Menu as MenuIcon, 
-  Close as CloseIcon,
-  MedicalServices as MedicalServicesIcon
+import {
+  Menu as MenuIcon,
+  MedicalServices as MedicalServicesIcon,
+  ArrowDropDown
 } from '@mui/icons-material';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-const navItems = [
+const otherNavItems = [
   { name: 'Home', path: '/' },
-  { name: 'Products', path: '/products' },
-  { name: 'Categories', path: '/categories' },
   { name: 'About Us', path: '/Aboutus' },
   { name: 'Contact', path: '/Contact' },
 ];
 
 function HideOnScroll({ children }) {
+  const [mounted, setMounted] = useState(false);
   const trigger = useScrollTrigger();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <Slide appear={false} direction="down" in={!trigger}>
       {children}
@@ -39,22 +46,40 @@ function HideOnScroll({ children }) {
   );
 }
 
+async function fetchCategories() {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch categories');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return [];
+  }
+}
+
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [openCategory, setOpenCategory] = useState(null);
+  const [productCategories, setProductCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  useEffect(() => {
+    const loadData = async () => {
+      const categories = await fetchCategories();
+      setProductCategories(categories);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,43 +88,41 @@ export default function Header() {
         setScrolled(isScrolled);
       }
     };
-
-    document.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      document.removeEventListener('scroll', handleScroll);
-    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  if (!mounted) return null;
 
   return (
     <>
       <HideOnScroll>
-        <AppBar 
-          position="fixed" 
+        <AppBar
+          position="fixed"
           elevation={scrolled ? 4 : 0}
-          className={`transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-transparent'}`}
           sx={{
             backdropFilter: 'blur(10px)',
             background: scrolled ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)',
             py: 0.5,
+            transition: 'all 0.3s ease',
           }}
         >
           <Container maxWidth="xl">
-            <Toolbar className="flex justify-between py-4">
-              {/* Logo */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Link href="/" className="flex items-center">
-                  <div className="w-10 h-10 bg-[#1976d2] rounded-full flex items-center justify-center mr-3">
-                    <MedicalServicesIcon className="text-white text-xl" />
-                  </div>
-                  <Typography 
-                    variant="h6" 
-                    className="font-bold text-[#1e293b]"
-                    sx={{ 
+            <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', py: 2 }}>
+              <Link href="/" passHref>
+                <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <Box sx={{ width: 40, height: 40, bgcolor: '#1976d2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', mr: 1.5 }}>
+                    <MedicalServicesIcon sx={{ color: 'white', fontSize: 24 }} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
                       display: { xs: 'none', md: 'block' },
+                      fontWeight: 'bold',
                       background: 'linear-gradient(90deg, #1976d2 0%, #4caf50 100%)',
                       WebkitBackgroundClip: 'text',
                       backgroundClip: 'text',
@@ -108,77 +131,159 @@ export default function Header() {
                   >
                     MedTech Pro
                   </Typography>
-                </Link>
-              </motion.div>
+                </Box>
+              </Link>
 
-              {/* Desktop Navigation */}
-              <Box sx={{ display: { xs: 'none', md: 'flex' } }} className="items-center gap-6">
-                {navItems.map((item) => (
-                  <motion.div
-                    key={item.name}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Link href={item.path}>
-                      <Button
-                        className={`font-medium ${scrolled ? 'text-[#1e293b] hover:text-[#1976d2]' : 'text-white hover:text-[#1976d2]'}`}
-                        sx={{
-                          textTransform: 'none',
-                          fontSize: '1rem',
-                          fontWeight: 500,
-                          position: 'relative',
-                          '&:after': {
-                            content: '""',
-                            position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            width: '0%',
-                            height: '2px',
-                            backgroundColor: '#1976d2',
-                            transition: 'width 0.3s ease',
-                          },
-                          '&:hover:after': {
-                            width: '100%',
-                          }
-                        }}
-                      >
-                        {item.name}
-                      </Button>
-                    </Link>
-                  </motion.div>
+              <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
+                {otherNavItems.map((item) => (
+                  <Link key={item.name} href={item.path} passHref>
+                    <Button
+                      sx={{
+                        textTransform: 'none',
+                        fontSize: '1rem',
+                        fontWeight: 500,
+                        color: scrolled ? '#1e293b' : 'white',
+                        '&:hover': { color: '#1976d2' },
+                      }}
+                    >
+                      {item.name}
+                    </Button>
+                  </Link>
                 ))}
-                
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+
+                {/* Categories Dropdown */}
+                <Box
+                  onMouseEnter={() => setOpenCategory(true)}
+                  onMouseLeave={() => setOpenCategory(false)}
+                  sx={{ position: 'relative' }}
                 >
                   <Button
-                    variant="contained"
-                    className="bg-[#1976d2] hover:bg-[#1565c0] text-white"
                     sx={{
                       textTransform: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 24px',
-                      fontWeight: 600,
-                      boxShadow: '0 4px 6px rgba(25, 118, 210, 0.2)',
-                      '&:hover': {
-                        boxShadow: '0 6px 8px rgba(25, 118, 210, 0.3)',
-                      }
+                      fontSize: '1rem',
+                      fontWeight: 500,
+                      color: scrolled ? '#1e293b' : 'white',
+                      '&:hover': { color: '#1976d2' },
+                      position: 'relative',
+                    }}
+                    endIcon={<ArrowDropDown />}
+                  >
+                    Categories
+                  </Button>
+
+                  <Collapse
+                    in={openCategory}
+                    timeout="auto"
+                    unmountOnExit
+                    sx={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      zIndex: 1200,
+                      width: 400,
                     }}
                   >
-                    Get a Quote
-                  </Button>
-                </motion.div>
+                    <Paper
+                      elevation={3}
+                      sx={{
+                        mt: 1,
+                        p: 2,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%)'
+                      }}
+                      onClick={() => setOpenCategory(false)}
+                    >
+                      {loading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                          <CircularProgress size={24} />
+                        </Box>
+                      ) : (
+                        <>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1976d2', mb: 1, pl: 1 }}>
+                            Browse Categories
+                          </Typography>
+                          <Divider sx={{ mb: 2 }} />
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                            {productCategories.map((category) => (
+                              <Link
+                                key={category.name}
+                                href={`/categories/${encodeURIComponent(category.category)}`}
+                                passHref
+                                legacyBehavior
+                              >
+                                <Box
+                                  sx={{
+                                    flex: '1 1 200px',
+                                    minWidth: 0,
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      backgroundColor: '#f0f7ff',
+                                      borderRadius: '4px'
+                                    }
+                                  }}
+                                >
+                                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, p: 1 }}>
+                                    {category.image_url && (
+                                      <img
+                                        src={category.image_url}
+                                        alt={category.name}
+                                        style={{
+                                          width: 40,
+                                          height: 40,
+                                          objectFit: 'cover',
+                                          borderRadius: 4,
+                                          marginRight: 8
+                                        }}
+                                      />
+                                    )}
+                                    <Typography
+                                      variant="subtitle1"
+                                      sx={{
+                                        fontWeight: 600,
+                                        color: '#1e293b',
+                                        borderLeft: '3px solid #1976d2',
+                                        pl: 1
+                                      }}
+                                    >
+                                      {category.name}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </Link>
+                            ))}
+                          </Box>
+                        </>
+                      )}
+                    </Paper>
+                  </Collapse>
+                </Box>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    px: 3,
+                    py: 1,
+                    fontWeight: 600,
+                    boxShadow: '0 4px 6px rgba(25, 118, 210, 0.2)',
+                    '&:hover': {
+                      boxShadow: '0 6px 8px rgba(25, 118, 210, 0.3)',
+                      bgcolor: '#1565c0'
+                    }
+                  }}
+                >
+                  Get a Quote
+                </Button>
               </Box>
 
-              {/* Mobile Menu Button */}
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
                 edge="end"
                 onClick={handleDrawerToggle}
-                sx={{ display: { md: 'none' } }}
-                className={scrolled ? 'text-[#1e293b]' : 'text-white'}
+                sx={{ display: { md: 'none' }, color: scrolled ? '#1e293b' : 'white' }}
               >
                 <MenuIcon />
               </IconButton>
@@ -186,68 +291,6 @@ export default function Header() {
           </Container>
         </AppBar>
       </HideOnScroll>
-
-      {/* Mobile Menu */}
-      <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: mobileOpen ? 0 : '100%' }}
-        transition={{ type: 'tween' }}
-        className={`fixed inset-0 z-40 bg-white w-3/4 max-w-sm h-screen shadow-2xl md:hidden ${mobileOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="flex justify-end p-4">
-          <IconButton onClick={handleDrawerToggle}>
-            <CloseIcon className="text-[#1e293b]" />
-          </IconButton>
-        </div>
-        <div className="flex flex-col p-6 space-y-6">
-          {navItems.map((item) => (
-            <motion.div
-              key={item.name}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Link href={item.path} onClick={handleDrawerToggle}>
-                <Typography 
-                  variant="h6" 
-                  className="text-[#1e293b] hover:text-[#1976d2] py-2"
-                  sx={{ fontWeight: 500 }}
-                >
-                  {item.name}
-                </Typography>
-              </Link>
-            </motion.div>
-          ))}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="mt-8"
-          >
-            <Button
-              variant="contained"
-              fullWidth
-              className="bg-[#1976d2] hover:bg-[#1565c0] text-white py-3"
-              sx={{
-                textTransform: 'none',
-                borderRadius: '8px',
-                fontWeight: 600,
-                fontSize: '1rem',
-              }}
-            >
-              Contact Sales
-            </Button>
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Backdrop for mobile menu */}
-      {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          onClick={handleDrawerToggle}
-          className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden"
-        />
-      )}
     </>
   );
 }

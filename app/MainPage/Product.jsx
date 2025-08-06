@@ -1,548 +1,434 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
-import { Box, Typography, Container, IconButton, useTheme } from '@mui/material';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Button, 
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Container,
+  Card,
+  CardContent,
+  CardMedia,
+  Skeleton
+} from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ArrowRight, Favorite, Share } from '@mui/icons-material';
 
-const ProductSection = () => {
-    const theme = useTheme();
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, margin: '-100px' });
-    
-    // Sample product data
-    const newArrivals = [
-        {
-            id: 1,
-            name: "Advanced MRI Scanner",
-            price: "$250,000",
-            image: "/images/slider1.jpg",
-            tag: "New"
-        },
-        {
-            id: 2,
-            name: "Portable Ultrasound",
-            price: "$45,000",
-            image: "/images/slider1.jpg",
-            tag: "Featured"
-        },
-        {
-            id: 3,
-            name: "Digital X-Ray System",
-            price: "$180,000",
-            image: "/images/slider1.jpg",
-            tag: "Limited"
-        },
-        {
-            id: 4,
-            name: "ECG Monitor Pro",
-            price: "$12,500",
-            image: "/images/slider1.jpg",
-            tag: "New"
-        },
-    ];
+const Product = () => {
+  const [subcategories, setSubcategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const carouselRef = useRef(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    const hotProducts = [
-        {
-            id: 5,
-            name: "Surgical Robot",
-            price: "$1.2M",
-            image: "/images/slider1.jpg",
-            tag: "Bestseller"
-        },
-        {
-            id: 6,
-            name: "AI Diagnostic Tool",
-            price: "$85,000",
-            image: "/images/slider1.jpg",
-            tag: "Trending"
-        },
-        {
-            id: 7,
-            name: "Neonatal Incubator",
-            price: "$32,000",
-            image: "/images/slider1.jpg",
-            tag: "Popular"
-        },
-        {
-            id: 8,
-            name: "Defibrillator Plus",
-            price: "$8,500",
-            image: "/images/slider1.jpg",
-            tag: "Hot"
-        },
-    ];
+  // Number of items to show at once
+  const itemsToShow = isMobile ? 1 : 4;
 
-    const [currentNewArrival, setCurrentNewArrival] = useState(0);
-    const [currentHotProduct, setCurrentHotProduct] = useState(0);
-    const [direction, setDirection] = useState('right');
-
-    const handleNext = (type) => {
-        setDirection('right');
-        if (type === 'new') {
-            setCurrentNewArrival(prev => (prev + 1) % newArrivals.length);
+  useEffect(() => {
+    async function fetchSubcategories() {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/subcategories`);
+        if (!response.ok) throw new Error('Failed to fetch subcategories');
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setSubcategories(data);
         } else {
-            setCurrentHotProduct(prev => (prev + 1) % hotProducts.length);
+          throw new Error('Invalid data format received');
         }
-    };
+      } catch (error) {
+        console.error('Error fetching subcategories:', error);
+        setError(error.message);
+        setSubcategories([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSubcategories();
+  }, []);
 
-    const handlePrev = (type) => {
-        setDirection('left');
-        if (type === 'new') {
-            setCurrentNewArrival(prev => (prev - 1 + newArrivals.length) % newArrivals.length);
-        } else {
-            setCurrentHotProduct(prev => (prev - 1 + hotProducts.length) % hotProducts.length);
-        }
-    };
-
-    // Animation variants
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                when: "beforeChildren"
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { y: 30, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1,
-            transition: {
-                duration: 0.6,
-                ease: [0.1, 0.7, 0.3, 1]
-            }
-        }
-    };
-
-    const carouselVariants = {
-        enter: (direction) => ({
-            x: direction === 'right' ? 300 : -300,
-            opacity: 0,
-            scale: 0.9
-        }),
-        center: {
-            x: 0,
-            opacity: 1,
-            scale: 1,
-            transition: {
-                duration: 0.5,
-                ease: [0.1, 0.7, 0.3, 1]
-            }
-        },
-        exit: (direction) => ({
-            x: direction === 'right' ? -300 : 300,
-            opacity: 0,
-            scale: 0.9,
-            transition: {
-                duration: 0.5,
-                ease: [0.1, 0.7, 0.3, 1]
-            }
-        })
-    };
-
-    return (
-        <Box sx={{ 
-            backgroundColor: 'white', 
-            py: 10,
-            position: 'relative',
-            overflow: 'hidden'
-        }} ref={ref}>
-            {/* Decorative elements */}
-            <Box sx={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: '300px',
-                height: '300px',
-                borderRadius: '50%',
-                background: theme.palette.primary.light,
-                filter: 'blur(100px)',
-                opacity: 0.15,
-                zIndex: 0
-            }} />
-            
-            <Container maxWidth="lg">
-                {/* New Arrivals Section */}
-                <motion.div
-                    initial="hidden"
-                    animate={isInView ? "visible" : "hidden"}
-                    variants={containerVariants}
-                >
-                    <motion.div variants={itemVariants}>
-                        <Typography variant="h4" sx={{ 
-                            mb: 1,
-                            fontWeight: 'bold',
-                            color: 'text.primary'
-                        }}>
-                            New Arrivals
-                        </Typography>
-                        <Typography variant="body1" sx={{ 
-                            mb: 4,
-                            color: 'text.secondary'
-                        }}>
-                            Discover our latest medical innovations
-                        </Typography>
-                    </motion.div>
-
-                    <Box sx={{ 
-                        position: 'relative', 
-                        minHeight: '400px',
-                        mb: 8
-                    }}>
-                        <AnimatePresence custom={direction} mode="wait">
-                            <motion.div
-                                key={currentNewArrival}
-                                custom={direction}
-                                variants={carouselVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                style={{
-                                    position: 'absolute',
-                                    width: '100%',
-                                    height: '100%'
-                                }}
-                            >
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: { xs: 'column', md: 'row' },
-                                    gap: 4,
-                                    height: '100%'
-                                }}>
-                                    {/* Product Image */}
-                                    <Box sx={{
-                                        flex: 1,
-                                        position: 'relative',
-                                        borderRadius: '16px',
-                                        overflow: 'hidden',
-                                        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                                        minHeight: '300px'
-                                    }}>
-                                        <Image
-                                            src={newArrivals[currentNewArrival].image}
-                                            alt={newArrivals[currentNewArrival].name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                        <Box sx={{
-                                            position: 'absolute',
-                                            top: 16,
-                                            right: 16,
-                                            backgroundColor: theme.palette.primary.main,
-                                            color: 'white',
-                                            px: 2,
-                                            py: 1,
-                                            borderRadius: '8px',
-                                            fontWeight: 'bold',
-                                            fontSize: '0.8rem'
-                                        }}>
-                                            {newArrivals[currentNewArrival].tag}
-                                        </Box>
-                                        <Box sx={{
-                                            position: 'absolute',
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
-                                            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
-                                            p: 3,
-                                            color: 'white'
-                                        }}>
-                                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                                {newArrivals[currentNewArrival].name}
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                {newArrivals[currentNewArrival].price}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-
-                                    {/* Product Details */}
-                                    <Box sx={{
-                                        flex: 1,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                        p: 3
-                                    }}>
-                                        <Typography variant="h4" sx={{ 
-                                            mb: 2,
-                                            fontWeight: 'bold',
-                                            color: 'text.primary'
-                                        }}>
-                                            {newArrivals[currentNewArrival].name}
-                                        </Typography>
-                                        <Typography variant="body1" sx={{ 
-                                            mb: 3,
-                                            color: 'text.secondary',
-                                            fontSize: '1.1rem',
-                                            lineHeight: 1.7
-                                        }}>
-                                            Cutting-edge technology with precision engineering for accurate diagnostics and improved patient outcomes. FDA-approved and trusted by leading hospitals worldwide.
-                                        </Typography>
-                                        <Typography variant="h5" sx={{ 
-                                            mb: 3,
-                                            fontWeight: 'bold',
-                                            color: theme.palette.primary.main
-                                        }}>
-                                            {newArrivals[currentNewArrival].price}
-                                        </Typography>
-                                        <Box>
-                                            <button style={{
-                                                backgroundColor: theme.palette.primary.main,
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '12px 24px',
-                                                borderRadius: '12px',
-                                                fontWeight: 'bold',
-                                                fontSize: '1rem',
-                                                cursor: 'pointer',
-                                                boxShadow: `0 4px 20px ${theme.palette.primary.main}40`,
-                                                transition: 'all 0.3s ease',
-                                                ':hover': {
-                                                    transform: 'translateY(-2px)',
-                                                    boxShadow: `0 6px 25px ${theme.palette.primary.main}60`
-                                                }
-                                            }}>
-                                                View Details
-                                            </button>
-                                        </Box>
-                                    </Box>
-                                </Box>
-                            </motion.div>
-                        </AnimatePresence>
-
-                        {/* Navigation Arrows */}
-                        <IconButton
-                            onClick={() => handlePrev('new')}
-                            sx={{
-                                position: 'absolute',
-                                left: { xs: 10, md: -60 },
-                                top: '50%',
-                                backgroundColor: 'white',
-                                color: theme.palette.primary.main,
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                                width: '50px',
-                                height: '50px',
-                                zIndex: 2,
-                                '&:hover': {
-                                    backgroundColor: theme.palette.primary.light
-                                }
-                            }}
-                        >
-                            <ArrowBackIosNewIcon />
-                        </IconButton>
-                        <IconButton
-                            onClick={() => handleNext('new')}
-                            sx={{
-                                position: 'absolute',
-                                right: { xs: 10, md: -60 },
-                                top: '50%',
-                                backgroundColor: 'white',
-                                color: theme.palette.primary.main,
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                                width: '50px',
-                                height: '50px',
-                                zIndex: 2,
-                                '&:hover': {
-                                    backgroundColor: theme.palette.primary.light
-                                }
-                            }}
-                        >
-                            <ArrowForwardIosIcon />
-                        </IconButton>
-                    </Box>
-                </motion.div>
-
-                {/* Hot Products Section */}
-                <motion.div
-                    initial="hidden"
-                    animate={isInView ? "visible" : "hidden"}
-                    variants={containerVariants}
-                >
-                    <motion.div variants={itemVariants}>
-                        <Typography variant="h4" sx={{ 
-                            mb: 1,
-                            fontWeight: 'bold',
-                            color: 'text.primary'
-                        }}>
-                            Hot Products
-                        </Typography>
-                        <Typography variant="body1" sx={{ 
-                            mb: 4,
-                            color: 'text.secondary'
-                        }}>
-                            Most popular in our catalog
-                        </Typography>
-                    </motion.div>
-
-                    <Box sx={{ 
-                        position: 'relative', 
-                        minHeight: '400px'
-                    }}>
-                        <AnimatePresence custom={direction} mode="wait">
-                            <motion.div
-                                key={currentHotProduct}
-                                custom={direction}
-                                variants={carouselVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                style={{
-                                    position: 'absolute',
-                                    width: '100%',
-                                    height: '100%'
-                                }}
-                            >
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: { xs: 'column-reverse', md: 'row' },
-                                    gap: 4,
-                                    height: '100%'
-                                }}>
-                                    {/* Product Details */}
-                                    <Box sx={{
-                                        flex: 1,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                        p: 3
-                                    }}>
-                                        <Box sx={{
-                                            display: 'inline-block',
-                                            mb: 2,
-                                            backgroundColor: theme.palette.error.light,
-                                            color: theme.palette.error.main,
-                                            px: 2,
-                                            py: 1,
-                                            borderRadius: '8px',
-                                            fontWeight: 'bold',
-                                            fontSize: '0.8rem'
-                                        }}>
-                                            {hotProducts[currentHotProduct].tag}
-                                        </Box>
-                                        <Typography variant="h4" sx={{ 
-                                            mb: 2,
-                                            fontWeight: 'bold',
-                                            color: 'text.primary'
-                                        }}>
-                                            {hotProducts[currentHotProduct].name}
-                                        </Typography>
-                                        <Typography variant="body1" sx={{ 
-                                            mb: 3,
-                                            color: 'text.secondary',
-                                            fontSize: '1.1rem',
-                                            lineHeight: 1.7
-                                        }}>
-                                            Industry-leading performance with revolutionary features that set new standards in medical technology. Used by top healthcare providers in 40+ countries.
-                                        </Typography>
-                                        <Typography variant="h5" sx={{ 
-                                            mb: 3,
-                                            fontWeight: 'bold',
-                                            color: theme.palette.error.main
-                                        }}>
-                                            {hotProducts[currentHotProduct].price}
-                                        </Typography>
-                                        <Box>
-                                            <button style={{
-                                                backgroundColor: theme.palette.error.main,
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '12px 24px',
-                                                borderRadius: '12px',
-                                                fontWeight: 'bold',
-                                                fontSize: '1rem',
-                                                cursor: 'pointer',
-                                                boxShadow: `0 4px 20px ${theme.palette.error.main}40`,
-                                                transition: 'all 0.3s ease',
-                                                ':hover': {
-                                                    transform: 'translateY(-2px)',
-                                                    boxShadow: `0 6px 25px ${theme.palette.error.main}60`
-                                                }
-                                            }}>
-                                                Order Now
-                                            </button>
-                                        </Box>
-                                    </Box>
-
-                                    {/* Product Image */}
-                                    <Box sx={{
-                                        flex: 1,
-                                        position: 'relative',
-                                        borderRadius: '16px',
-                                        overflow: 'hidden',
-                                        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                                        minHeight: '300px'
-                                    }}>
-                                        <Image
-                                            src={hotProducts[currentHotProduct].image}
-                                            alt={hotProducts[currentHotProduct].name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                        <Box sx={{
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                            right: 0,
-                                            bottom: 0,
-                                            background: `linear-gradient(135deg, ${theme.palette.error.main}20 0%, transparent 100%)`
-                                        }} />
-                                    </Box>
-                                </Box>
-                            </motion.div>
-                        </AnimatePresence>
-
-                        {/* Navigation Arrows */}
-                        <IconButton
-                            onClick={() => handlePrev('hot')}
-                            sx={{
-                                position: 'absolute',
-                                left: { xs: 10, md: -60 },
-                                top: '50%',
-                                backgroundColor: 'white',
-                                color: theme.palette.error.main,
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                                width: '50px',
-                                height: '50px',
-                                zIndex: 2,
-                                '&:hover': {
-                                    backgroundColor: theme.palette.error.light
-                                }
-                            }}
-                        >
-                            <ArrowBackIosNewIcon />
-                        </IconButton>
-                        <IconButton
-                            onClick={() => handleNext('hot')}
-                            sx={{
-                                position: 'absolute',
-                                right: { xs: 10, md: -60 },
-                                top: '50%',
-                                backgroundColor: 'white',
-                                color: theme.palette.error.main,
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                                width: '50px',
-                                height: '50px',
-                                zIndex: 2,
-                                '&:hover': {
-                                    backgroundColor: theme.palette.error.light
-                                }
-                            }}
-                        >
-                            <ArrowForwardIosIcon />
-                        </IconButton>
-                    </Box>
-                </motion.div>
-            </Container>
-        </Box>
+  const nextSlide = () => {
+    setCurrentIndex(prev => 
+      prev >= subcategories.length - itemsToShow ? 0 : prev + 1
     );
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex(prev => 
+      prev <= 0 ? subcategories.length - itemsToShow : prev - 1
+    );
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50, scale: 0.9 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }),
+    hover: {
+      y: -10,
+      scale: 1.03,
+      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const imageVariants = {
+    hidden: { opacity: 0, scale: 1.1 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.8 }
+    },
+    hover: {
+      scale: 1.05,
+      transition: { duration: 0.5 }
+    }
+  };
+
+  const shimmerVariants = {
+    initial: { backgroundPosition: '-200% 0' },
+    animate: { 
+      backgroundPosition: '200% 0',
+      transition: { 
+        duration: 1.5,
+        repeat: Infinity,
+        ease: 'linear'
+      }
+    }
+  };
+
+  const visibleItems = subcategories.slice(currentIndex, currentIndex + itemsToShow);
+
+  if (error) {
+    return (
+      <Box className="py-20 text-center">
+        <Typography variant="h5" color="error">
+          Error loading subcategories: {error}
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={() => window.location.reload()}
+          sx={{ mt: 2 }}
+        >
+          Retry
+        </Button>
+      </Box>
+    );
+  }
+
+  return (
+    <Box className="py-16 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+      {/* Floating decorative elements */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.05 }}
+        transition={{ delay: 1 }}
+        className="absolute left-1/4 top-0 w-64 h-64 rounded-full bg-blue-400 blur-3xl -z-10"
+      />
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.05 }}
+        transition={{ delay: 1.2 }}
+        className="absolute right-1/4 bottom-0 w-64 h-64 rounded-full bg-purple-400 blur-3xl -z-10"
+      />
+      
+      <Container maxWidth="xl" ref={carouselRef}>
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <Typography 
+            variant="overline" 
+            className="block mb-2 font-medium tracking-wider"
+            sx={{ color: 'primary.main' }}
+          >
+            Medical Equipment Categories
+          </Typography>
+          <Typography 
+            variant={isMobile ? 'h3' : 'h2'} 
+            component="h2"
+            className="font-bold mb-4"
+            sx={{
+              background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              color: 'transparent',
+              textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            Specialized Instruments
+          </Typography>
+        </motion.div>
+
+        {/* Carousel Container */}
+        <Box className="relative">
+          {/* Navigation Arrows */}
+          {!loading && subcategories.length > itemsToShow && (
+            <>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10"
+              >
+                <IconButton
+                  onClick={prevSlide}
+                  sx={{ 
+                    backgroundColor: 'white',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    '&:hover': { backgroundColor: 'grey.100' }
+                  }}
+                >
+                  <ChevronLeft sx={{ fontSize: '2rem', color: 'primary.main' }} />
+                </IconButton>
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10"
+              >
+                <IconButton
+                  onClick={nextSlide}
+                  sx={{ 
+                    backgroundColor: 'white',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    '&:hover': { backgroundColor: 'grey.100' }
+                  }}
+                >
+                  <ChevronRight sx={{ fontSize: '2rem', color: 'primary.main' }} />
+                </IconButton>
+              </motion.div>
+            </>
+          )}
+
+          {/* Carousel Items */}
+          <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 px-2">
+            {loading ? (
+              Array.from({ length: itemsToShow }).map((_, index) => (
+                <motion.div
+                  key={`skeleton-${index}`}
+                  variants={shimmerVariants}
+                  initial="initial"
+                  animate="animate"
+                  style={{
+                    background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+                    backgroundSize: '400% 100%',
+                    borderRadius: '12px',
+                    height: '320px'
+                  }}
+                />
+              ))
+            ) : (
+              <AnimatePresence mode="wait">
+                {visibleItems.map((item, index) => (
+                  <motion.div
+                    key={item.id || index}
+                    custom={index}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover="hover"
+                    variants={cardVariants}
+                    onHoverStart={() => setHoveredCard(item.id)}
+                    onHoverEnd={() => setHoveredCard(null)}
+                    className="h-full"
+                  >
+                    <Card 
+                      sx={{ 
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'relative',
+                        border: '1px solid rgba(0,0,0,0.05)'
+                      }}
+                    >
+                      {/* Image with hover effect */}
+                      <motion.div
+                        variants={imageVariants}
+                        style={{ overflow: 'hidden', height: '180px', position: 'relative' }}
+                      >
+                        <CardMedia
+                          component="img"
+                          image={item.image_path || '/images/medical-placeholder.jpg'}
+                          alt={item.title}
+                          sx={{ 
+                            height: '100%',
+                            width: '100%',
+                            objectFit: 'cover',
+                            transition: 'transform 0.5s ease'
+                          }}
+                        />
+                        
+                        {/* Category badge */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          sx={{
+                            position: 'absolute',
+                            bottom: 16,
+                            left: 16,
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            color: 'white',
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {item.category}
+                        </motion.div>
+                        
+                        {/* Action buttons */}
+                        <Box sx={{ 
+                          position: 'absolute', 
+                          top: 12, 
+                          right: 12,
+                          display: 'flex',
+                          gap: 1
+                        }}>
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ 
+                              opacity: hoveredCard === item.id ? 1 : 0.7,
+                              scale: hoveredCard === item.id ? 1.1 : 1
+                            }}
+                            whileHover={{ scale: 1.2 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <IconButton
+                              aria-label="add to favorites"
+                              sx={{ 
+                                backgroundColor: 'rgba(255,255,255,0.9)',
+                                '&:hover': { backgroundColor: 'rgba(255,255,255,1)' },
+                                p: 0.5
+                              }}
+                            >
+                              <Favorite sx={{ fontSize: '1rem', color: 'error.main' }} />
+                            </IconButton>
+                          </motion.div>
+                          
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ 
+                              opacity: hoveredCard === item.id ? 1 : 0.7,
+                              scale: hoveredCard === item.id ? 1.1 : 1
+                            }}
+                            whileHover={{ scale: 1.2 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <IconButton
+                              aria-label="share"
+                              sx={{ 
+                                backgroundColor: 'rgba(255,255,255,0.9)',
+                                '&:hover': { backgroundColor: 'rgba(255,255,255,1)' },
+                                p: 0.5
+                              }}
+                            >
+                              <Share sx={{ fontSize: '1rem', color: 'primary.main' }} />
+                            </IconButton>
+                          </motion.div>
+                        </Box>
+                      </motion.div>
+
+                      {/* Content */}
+                      <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                        <Typography 
+                          variant="h6" 
+                          component="h3"
+                          sx={{ 
+                            fontWeight: 700,
+                            mb: 1,
+                            minHeight: '3em',
+                            lineHeight: 1.3
+                          }}
+                        >
+                          {item.title}
+                        </Typography>
+                        
+                        <motion.div
+                          whileHover={{ x: 5 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Button
+                            variant="text"
+                            color="primary"
+                            size="small"
+                            endIcon={<ArrowRight />}
+                            sx={{
+                              fontWeight: 600,
+                              px: 0,
+                              textTransform: 'none',
+                              justifyContent: 'flex-start',
+                              '&:hover': { 
+                                backgroundColor: 'transparent',
+                                textDecoration: 'underline'
+                              }
+                            }}
+                              href={`/subcategories/${item.slug || item.subcategory.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
+                            View Products
+                          </Button>
+                        </motion.div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
+          </Box>
+        </Box>
+
+        {/* View All Button */}
+        {!loading && subcategories.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="text-center mt-12"
+          >
+            <Button
+              variant="outlined"
+              color="primary"
+              size="large"
+              endIcon={<ArrowRight />}
+              sx={{
+                borderRadius: '8px',
+                fontWeight: 600,
+                px: 4,
+                py: 1.5,
+                borderWidth: 2,
+                '&:hover': { borderWidth: 2 }
+              }}
+            >
+              Browse All Categories
+            </Button>
+          </motion.div>
+        )}
+      </Container>
+    </Box>
+  );
 };
 
-export default ProductSection;
+export default Product;
