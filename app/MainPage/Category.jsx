@@ -12,7 +12,7 @@ const CyberMedCategories = () => {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`);
+        const response = await fetch(`/api/categories`);
         if (!response.ok) throw new Error('Failed to fetch categories');
         const data = await response.json();
         setCategories(data);
