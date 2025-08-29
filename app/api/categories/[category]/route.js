@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb';
 
 export async function GET(request, { params }) {
   try {
-    const client = await MongoClient.connect(process.env.MONGODB_URI);
+    const client = await MongoClient.connect(`mongodb+srv://saluvia:N2742a4633@cluster0.2opnnfp.mongodb.net/saluvia`);
     const db = client.db();
 
     // Fetch the main category
